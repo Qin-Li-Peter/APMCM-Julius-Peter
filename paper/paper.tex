@@ -1,0 +1,446 @@
+% !TeX program = xelatex
+% 2026 APMCM 中文赛项论文模板的 LaTeX 格式迁移版
+% 仅迁移模板格式，不包含任何论文正文内容。
+
+\documentclass[12pt,a4paper]{ctexart}
+
+\usepackage[a4paper,left=2.54cm,right=2.54cm,top=2.54cm,bottom=2.54cm]{geometry}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{setspace}
+\usepackage{indentfirst}
+\usepackage{fontspec}
+\usepackage{amsmath,amssymb}
+\usepackage{longtable,booktabs,array}
+\setlength{\LTleft}{0pt}
+\setlength{\LTright}{0pt}
+
+% ===== 字体设置 =====
+% 中文字体交给 ctex 在 Windows 下自动匹配宋体、黑体等；
+% 英文字体优先使用 Times New Roman；若当前环境不存在该字体，则保留默认西文字体以保证可编译。
+\IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}{}
+
+% Windows 的 SimSun 通常没有真实粗体字形，直接 bfseries 会出现 Font shape undefined。
+% 这里单独定义“仿粗宋体”给表头使用，既保持宋体观感，又避免编译警告。
+\IfFontExistsTF{SimSun}{%
+  \setCJKfamilyfont{songfakebold}[AutoFakeBold=2.4]{SimSun}%
+  \newcommand{\SongFakeBold}{\CJKfamily{songfakebold}}%
+}{%
+  \newcommand{\SongFakeBold}{\songti\bfseries}%
+}
+
+\pagestyle{empty}              % 模板原文件不显示页码
+\setlength{\parindent}{2em}    % 中文正文首行缩进两个汉字
+\setlength{\parskip}{0pt}
+\setstretch{1.0}               % 单倍行距
+\zihao{-4}                     % 正文默认小四号
+
+\definecolor{apmcmred}{RGB}{255,0,0}
+
+% ===== 统一字号命令 =====
+\newcommand{\HeaderMainFont}{\SongFakeBold\zihao{4}}   % 表头：四号加粗宋体，英文随正文为 Times New Roman
+\newcommand{\HeaderSideFont}{\songti\zihao{5}}             % 选题、参赛编号：五号宋体
+\newcommand{\PaperTitleFont}{\heiti\zihao{-3}}             % 论文标题：小三号黑体
+\newcommand{\SectionTitleFont}{\heiti\zihao{4}}            % 摘要、参考文献、附录等标题：四号黑体
+\newcommand{\BodyFont}{\songti\zihao{-4}\setstretch{1.0}} % 正文：小四号宋体，单倍行距
+
+% 如后续正文使用 \section，默认也设为四号黑体。
+\ctexset{
+  section = {
+    format = \SectionTitleFont,
+    aftername = \quad,
+    beforeskip = 1.0em,
+    afterskip = 0.8em
+  },
+  subsection = {
+    format = \heiti\zihao{-4},
+    aftername = \quad,
+    beforeskip = 0.8em,
+    afterskip = 0.5em
+  }
+}
+
+% ===== 顶部信息表 =====
+\newcommand{\APMCMHeader}{%
+  \begin{center}
+  \begin{tikzpicture}[x=1cm,y=1cm,line width=0.45pt]
+    \def\W{16.00}   % 表格总宽度
+    \def\H{2.78}    % 表格总高度
+    \def\L{2.90}    % 左栏宽度
+    \def\R{2.70}    % 右栏宽度
+    \def\Top{0.58}  % 第一行高度
+
+    \draw (0,0) rectangle (\W,\H);
+    \draw (\L,0) -- (\L,\H);
+    \draw (\W-\R,0) -- (\W-\R,\H);
+    \draw (0,\H-\Top) -- (\L,\H-\Top);
+    \draw (\W-\R,\H-\Top) -- (\W,\H-\Top);
+
+    \node at (\L/2,\H-\Top/2) {\HeaderSideFont 选题};
+    \node at (\W-\R/2,\H-\Top/2) {\HeaderSideFont 参赛编号};
+    \node[align=center] at ({(\L+\W-\R)/2},{\H/2})
+      {\HeaderMainFont 2026 年第十六届 APMCM\\[0.26cm]
+       \HeaderMainFont 亚太地区大学生数学建模竞赛（中文赛项）};
+    \node at (\W-\R/2,{(\H-\Top)/2}) {\HeaderSideFont apmcm******};
+  \end{tikzpicture}
+  \end{center}
+}
+
+\begin{document}
+\BodyFont
+
+\APMCMHeader
+
+\vspace{0.95cm}
+
+\begin{center}
+{\PaperTitleFont 标题（\textcolor{apmcmred}{此处换成论文的标题}）}
+\end{center}
+
+\vspace{0.55cm}
+
+\begin{center}
+{\SectionTitleFont 摘要}
+\end{center}
+
+\vspace{0.45cm}
+
+\noindent（说明：以下开始写摘要，正文从下一页开始。摘要及正文格式基本要求是宋体，\\[0.38cm]
+小四号，单倍行距，没有要求的地方就自行处理。\textcolor{apmcmred}{看完后删除该说明}）
+
+\newpage
+
+% ===== 正文从这里开始。正式写作时删除下一行占位文字。 =====
+\BodyFont
+
+
+
+\section{芯片热管理系统传热模型}
+
+\subsection{模型假设及说明}
+
+芯片歧管式微通道热管理系统属于典型的固--液共轭传热结构。芯片等效热源产生的热量先经氮化铝实体层传导，经歧管分配层至微通道壁面与针肋，最后由去离子水带走。冷却液由顶部入口进入歧管分配层，随后进入下方带针肋的微通道换热层，沿歧管单元依次完成换热后从侧部出口流出。
+
+为在保留主要物理机制的同时建立可用于后续优化的显式关系式，模型作如下假设：
+
+\begin{enumerate}
+    \item 系统处于稳态工作状态，冷却液入口质量流量、入口温度、出口压力、外部环境温度和材料物性均按题目给定值取定。
+
+    \item 冷却液视为不可压缩牛顿流体，密度、比热、导热系数和动力黏度取常数。由于工质和入口总流量固定，雷诺数、努塞尔数等无量纲量不作为新的设计变量出现，其变化由结构参数诱导，并吸收到等效换热系数和等效阻力系数中。
+
+    \item 芯片热源在给定区域内均匀发热，氮化铝实体层内以导热和横向均热为主。固体区导热作用用等效固体热阻表示，芯片热源的总发热功率记为
+    \begin{equation}
+        P_h=q'''A_h t_h ,
+    \end{equation}
+    其中 $q'''$ 为体热源强度，$A_h$ 为热源平面面积，$t_h$ 为热源厚度。
+
+    \item 沿冷却液主流方向，将换热区域划分为 $J$ 个几何相同的歧管换热单元，各单元沿流向串联：前一单元出口冷却液温度作为后一单元入口温度，各单元压降沿流向累加。单元内部的针肋绕流、局部混合和微尺度速度场用等效换热面积、扰流强化因子和局部阻力系数表征。
+
+    \item 为得到关于 $\beta,\gamma,N_r$ 的显式解析模型，采用总流体层高度近似固定的闭合假设
+    \begin{equation}
+        h_{\mathrm{mf}}+h_{\mathrm{mc}}=H_f ,
+    \end{equation}
+    由 $\gamma=h_{\mathrm{mf}}/h_{\mathrm{mc}}$ 得
+    \begin{equation}
+        h_{\mathrm{mc}}=\frac{H_f}{1+\gamma},\qquad
+        h_{\mathrm{mf}}=\frac{\gamma H_f}{1+\gamma}.
+    \end{equation}
+    该假设刻画封装高度受限时歧管层与微通道层的空间分配。若数据表明微通道高度近似不变，可在问题二代理模型中对 $\gamma$ 的影响进行修正。
+
+    \item 当 $N_r=0$ 时针肋不存在，针肋宽度比 $\beta$ 失去物理意义，故引入指示函数
+    \begin{equation}
+        I_N=\begin{cases}1,& N_r>0,\\[2pt]0,& N_r=0,\end{cases}
+    \end{equation}
+    使 $\beta$ 引起的阻塞、面积增益与扰流强化在 $N_r=0$ 时自动消失，模型退化为光通道基准，与数据中 $\beta=0,N_r=0$ 的基准样本一致。
+
+    \item 本节模型仅论证各项的物理来源、符号与主导次数关系；其中经验系数 $C_\bullet,a_A,a_\phi,b_\phi,m,\lambda,\gamma_0$ 等不取定数值，其确切取值由问题二在样本数据上标定，即"机理定结构与符号、数据定系数"。
+\end{enumerate}
+
+\subsection{记号说明}
+
+\begin{longtable}{@{}>{\centering\arraybackslash}p{0.17\textwidth}
+                  >{\centering\arraybackslash}p{0.13\textwidth}
+                  p{0.66\textwidth}@{}}
+\caption{主要记号说明}\label{tab:notation-q1}\\
+\specialrule{2pt}{0pt}{0pt}
+记号 & 单位 & 含义\\
+\midrule
+\endfirsthead
+
+\multicolumn{3}{@{}l}{续表~\thetable\quad 主要记号说明}\\
+\specialrule{2pt}{0pt}{0pt}
+记号 & 单位 & 含义\\
+\midrule
+\endhead
+
+\midrule
+\multicolumn{3}{r@{}}{续下页}\\
+\endfoot
+
+\specialrule{2pt}{0pt}{0pt}
+\endlastfoot
+
+$\beta$ & $-$ & 针肋宽度比，$\beta=d_p/w_c$\\
+$\gamma$ & $-$ & 歧管深高比，$\gamma=h_{\mathrm{mf}}/h_{\mathrm{mc}}$\\
+$N_r$ & $-$ & 单个歧管单元内沿流向的针肋排数\\
+$I_N$ & $-$ & 针肋存在指示函数（$N_r>0$ 取 1，否则取 0）\\
+$d_p$ & m & 针肋直径\\
+$w_c$ & m & 微通道特征宽度\\
+$h_{\mathrm{mf}}$ & m & 歧管分配层高度\\
+$h_{\mathrm{mc}}$ & m & 微通道换热层高度\\
+$H_f$ & m & 歧管层与微通道层的等效总流体高度\\
+$J$ & $-$ & 沿流向划分的串联歧管换热单元数\\
+$P_h$ & W & 芯片总发热功率\\
+$Q_j$ & W & 第 $j$ 个歧管换热单元承担的热负荷\\
+$\dot m$ & kg/s & 冷却液总质量流量\\
+$c_p$ & J/(kg$\cdot$K) & 冷却液定压比热\\
+$T_{\mathrm{in}}$ & K & 系统入口冷却液温度\\
+$T_{f,j}$ & K & 第 $j$ 个单元入口处的冷却液平均温度\\
+$T_{w,j}$ & K & 第 $j$ 个单元对应的芯片局部等效温度\\
+$T_{\max}$ & K & 芯片区域最高温度\\
+$R_{\mathrm{cal}}$ & K/W & 冷却液显热热阻，$R_{\mathrm{cal}}=1/(\dot m c_p)$\\
+$R_{\mathrm{s}}$ & K/W & 单元固体导热等效热阻\\
+$R_{\mathrm{u}}$ & K/W & 单元从热源到冷却液的总等效热阻\\
+$u_{\mathrm{mc}},u_{\mathrm{mf}}$ & m/s & 微通道、歧管层平均流速\\
+$D_{h,\mathrm{mc}}$ & m & 微通道等效水力直径\\
+$A_e$ & m$^2$ & 单元等效固液换热面积\\
+$\lambda$ & $-$ & 针肋占据通流截面的几何修正系数\\
+$\gamma_0$ & $-$ & 歧管--微通道较优匹配深高比\\
+$m$ & $-$ & 微通道高度变化对基础换热的净影响指数\\
+$\mathcal{H}$ & $-$ & 单元综合换热能力因子\\
+$\mathcal{B}$ & $-$ & 针肋阻塞损失因子\\
+$\mathcal{M}$ & $-$ & 歧管--微通道流阻匹配偏差因子\\
+$\Delta P$ & Pa & 系统总压降\\
+$R_{\mathrm{th}}$ & K/W & 系统热阻\\
+$\Theta$ & $-$ & 温度非均匀性指标\\
+\end{longtable}
+
+\subsection{完整共轭传热模型}
+
+流体区域包括歧管分配层与微通道换热层，固体区域包括芯片热源等效层、氮化铝导热层及流道壁面。流体区满足连续性方程
+\begin{equation}
+    \nabla\cdot \mathbf{u}=0,
+\end{equation}
+动量方程
+\begin{equation}
+    \rho(\mathbf{u}\cdot\nabla)\mathbf{u}=-\nabla p+\mu\nabla^2\mathbf{u},
+\end{equation}
+以及能量方程
+\begin{equation}
+    \rho c_p\mathbf{u}\cdot\nabla T_f=k_f\nabla^2T_f .
+\end{equation}
+固体区域满足带热源项的导热方程
+\begin{equation}
+    \nabla\cdot(k_s\nabla T_s)+q'''\chi_h=0,
+\end{equation}
+其中 $\chi_h$ 为热源区域指示函数。固液界面满足无滑移、温度连续和热流连续：
+\begin{equation}
+    \mathbf{u}=0,\qquad T_f=T_s,\qquad
+    -k_f\nabla T_f\cdot\mathbf{n}=-k_s\nabla T_s\cdot\mathbf{n}.
+\end{equation}
+
+上述方程描述真实三维共轭传热过程，但直接求解需完整三维几何与针肋阵列细节，其数值采样即为附件 2。问题一的目标是建立结构参数与性能指标之间的可解释关系，故在控制方程基础上进行单元平均降阶，保留三类主要机制：针肋造成的换热面积增加与扰流强化、针肋造成的局部阻塞与压降惩罚、歧管层与微通道层高度配比造成的流阻匹配变化。
+
+\subsection{串联歧管单元的平均降阶}
+
+将沿流向排列的歧管换热区划分为 $J$ 个串联单元。为得到解析表达式，设热源影响区内各单元承担相同热负荷
+\begin{equation}
+    Q_j=\frac{P_h}{J},\qquad j=1,2,\ldots,J .
+\end{equation}
+若考虑横向均热与中心热源投影造成的非均匀热负荷，可改写为 $Q_j=\omega_jP_h$（$\sum_j\omega_j=1$）；在问题一显式模型中，均匀热负荷已足以反映串联升温的主导效应。
+
+由总高度闭合假设，微通道主体速度、歧管层速度与水力直径具有如下尺度关系（$0<\lambda\le1$ 为针肋占据通流截面的几何修正系数）：
+\begin{equation}
+    u_{\mathrm{mc}}\propto \frac{1+\gamma}{1-\lambda\beta I_N},\qquad
+    u_{\mathrm{mf}}\propto \frac{1+\gamma}{\gamma},\qquad
+    D_{h,\mathrm{mc}}\propto h_{\mathrm{mc}}\propto (1+\gamma)^{-1}.
+\end{equation}
+
+针肋宽度比与排数同时影响换热面积。单元等效换热面积 $A_e=A_0+\eta_pA_p$，其中针肋侧面积 $A_p\propto d_pN_rh_{\mathrm{mc}}\propto \beta N_r/(1+\gamma)$，据此定义无量纲面积增益
+\begin{equation}
+    \mathcal{A}(\beta,\gamma,N_r)=1+a_A\frac{\beta N_r}{1+\gamma},\qquad a_A>0.
+\end{equation}
+针肋还打断热边界层并诱导尾迹涡，扰流强化随 $\beta N_r$ 增大但存在边际递减，取
+\begin{equation}
+    \Phi(\beta,N_r)=1+a_\phi\left[1-\exp(-b_\phi\beta N_r)\right],\qquad a_\phi,b_\phi>0.
+\end{equation}
+基础对流换热系数 $h_0\sim Nu\,k_f/D_{h,\mathrm{mc}}$，微通道高度变化对其净影响以指数 $m$ 表示，$h_0\propto(1+\gamma)^m$（$0<m\le1$，由数据标定）。于是单元综合换热能力因子
+\begin{equation}
+    \mathcal{H}(\beta,\gamma,N_r)
+    =(1+\gamma)^m
+    \left(1+a_A\frac{\beta N_r}{1+\gamma}\right)
+    \left\{1+a_\phi\left[1-\exp(-b_\phi\beta N_r)\right]\right\}.
+\end{equation}
+此处以 $h_0\propto(1+\gamma)^m$ 为唯一的"流速--换热"标度、扰流以乘性因子叠加，不另引与之不一致的边界层标度；指数 $m$ 把"微通道变薄使对流系数升高"与"换热体积/面积减小"的净效应交由数据定号。
+
+针肋越粗、排数越多，通流截面越小，局部绕流形阻与尾迹低速区越明显。定义针肋阻塞损失因子
+\begin{equation}
+    \mathcal{B}(\beta,\gamma,N_r)=N_r\left(\frac{\beta}{1-\lambda\beta}\right)^2(1+\gamma)^2,
+\end{equation}
+其中 $(1+\gamma)^2$ 来自微通道速度尺度 $u_{\mathrm{mc}}^2$，$1-\lambda\beta$ 反映针肋占据截面后的间隙加速；$N_r=0$ 时 $\mathcal B=0$，自动退化。
+
+歧管深高比控制歧管层与微通道层的流阻匹配。设 $\gamma_0$ 为较优匹配深高比，定义匹配偏差因子
+\begin{equation}
+    \mathcal{M}(\gamma)=\frac{\gamma}{\gamma_0}+\frac{\gamma_0}{\gamma}-2 ,
+\end{equation}
+其在 $\gamma=\gamma_0$ 取 $0$、两侧增大，用于表征歧管过浅（分配不均）或过深（换热空间压缩）造成的偏离，使 $\gamma$ 对各指标具备内部最优能力。
+
+\subsection{热阻表达式}
+
+各歧管单元沿流向串联，冷却液温度递推为
+\begin{equation}
+    T_{f,1}=T_{\mathrm{in}},\qquad
+    T_{f,j+1}=T_{f,j}+\frac{Q_j}{\dot m c_p},
+\end{equation}
+在 $Q_j=P_h/J$ 下
+\begin{equation}
+    T_{f,j}=T_{\mathrm{in}}+\frac{(j-1)P_h}{J\dot m c_p}.
+\end{equation}
+单元等效热阻由固体导热、对流换热、阻塞惩罚与匹配偏差组成：
+\begin{equation}
+    R_u(\beta,\gamma,N_r)
+    =R_s+C_h\mathcal{H}^{-1}+C_b\mathcal{B}+C_m\mathcal{M},\qquad C_h,C_b,C_m>0.
+\end{equation}
+第 $j$ 单元芯片局部等效温度（$\chi$ 为单元内平均升温修正，取 $1/2$）
+\begin{equation}
+    T_{w,j}=T_{f,j}+\chi\frac{P_h}{J\dot m c_p}+\frac{P_h}{J}R_u .
+\end{equation}
+最高温出现在末单元：
+\begin{equation}
+    T_{\max}=T_{\mathrm{in}}+\frac{(J-1+\chi)P_h}{J\dot m c_p}+\frac{P_h}{J}R_u .
+\end{equation}
+故系统热阻
+\begin{equation}
+    R_{\mathrm{th}}=\frac{T_{\max}-T_{\mathrm{in}}}{P_h}
+    =\frac{J-1+\chi}{J\dot m c_p}+\frac{1}{J}R_u(\beta,\gamma,N_r).
+\end{equation}
+当 $J$ 较大时显热项趋于 $1/(\dot m c_p)=R_{\mathrm{cal}}$，由附件参数 $\dot m=10^{-3}\,\mathrm{kg/s}$、$c_p=4182\,\mathrm{J/(kg\cdot K)}$ 得 $R_{\mathrm{cal}}\approx0.239\,\mathrm{K/W}$，是与结构无关的热阻理论下限。引入参考热阻无量纲化，得
+\begin{equation}
+\begin{aligned}
+    R^*(\beta,\gamma,N_r)
+    &=C_{R0}
+    +C_{R1}\left[(1+\gamma)^m
+    \left(1+a_A\frac{\beta N_r}{1+\gamma}\right)
+    \left\{1+a_\phi\left[1-\exp(-b_\phi\beta N_r)\right]\right\}\right]^{-1}\\
+    &\quad
+    +C_{R2}N_r\left(\frac{\beta}{1-\lambda\beta}\right)^2(1+\gamma)^2
+    +C_{R3}\left(\frac{\gamma}{\gamma_0}+\frac{\gamma_0}{\gamma}-2\right),
+\end{aligned}
+\label{eq:Rstar-final}
+\end{equation}
+其中 $C_{R0}$ 吸收固体导热与显热热阻等基准，$C_{R1},C_{R2},C_{R3}>0$。
+
+\subsection{压降表达式}
+
+系统压降由歧管段、微通道沿程与针肋局部损失组成。歧管段动压损失
+\begin{equation}
+    \Delta P_{\mathrm{mf}}^*\sim\left(\frac{1+\gamma}{\gamma}\right)^2 .
+\end{equation}
+微通道层流摩擦 $\Delta P_{\mathrm{mc}}\propto u_{\mathrm{mc}}/D_{h,\mathrm{mc}}^2$，代入速度与水力直径尺度
+\begin{equation}
+    \Delta P_{\mathrm{mc}}^*\sim\frac{(1+\gamma)^3}{1-\lambda\beta I_N}.
+\end{equation}
+针肋局部损失按局部动压沿 $N_r$ 排累积（局部阻力系数 $K_p\propto(\beta/(1-\lambda\beta))^2$）
+\begin{equation}
+    \Delta P_{\mathrm{pin}}^*\sim N_r\left(\frac{\beta}{1-\lambda\beta}\right)^2(1+\gamma)^2 .
+\end{equation}
+将固定入口、出口与缩扩损失吸收到常数项，得无量纲总压降
+\begin{equation}
+\begin{aligned}
+    \Delta P^*(\beta,\gamma,N_r)
+    &=C_{P0}+C_{P1}\left(\frac{1+\gamma}{\gamma}\right)^2
+    +C_{P2}\frac{(1+\gamma)^3}{1-\lambda\beta I_N}\\
+    &\quad+C_{P3}N_r\left(\frac{\beta}{1-\lambda\beta}\right)^2(1+\gamma)^2 ,
+\end{aligned}
+\label{eq:Pstar-final}
+\end{equation}
+其中 $C_{P0},\ldots,C_{P3}>0$。需说明：$\beta$ 同时进入沿程项与局部项并非重复计入——沿程项的 $1-\lambda\beta$ 来自"针肋占据截面使主体流速升高、壁面黏性摩擦增大"，局部项来自"针肋绕流的形阻与尾迹损失"，二者为相互独立的物理机制；$N_r=0$ 时经 $I_N$ 与 $N_r$ 因子同时归零。
+
+\subsection{温度非均匀性表达式}
+
+温度非均匀性来源于串联沿程升温、局部换热不足，以及针肋过密或歧管匹配偏离造成的局部低速区与供液不均。在均匀单元热负荷下，轴向温升为等差序列，其标准差正比于
+\begin{equation}
+    \frac{P_h}{J\dot m c_p}\sqrt{\frac{J^2-1}{12}},
+\end{equation}
+为给定工况下的常数，记入 $C_{\Theta0}$。需注意：分流不均、阻塞等\emph{全局}修正若以相同常数加到每个 $T_{w,j}$ 上，会在标准差中相互抵消而无法进入指标；故结构对温度非均匀性的影响通过换热能力、阻塞与匹配三项结构因子显式表达：
+\begin{equation}
+\begin{aligned}
+    \Theta^*(\beta,\gamma,N_r)
+    &=C_{\Theta0}
+    +C_{\Theta1}\left[(1+\gamma)^m
+    \left(1+a_A\frac{\beta N_r}{1+\gamma}\right)
+    \left\{1+a_\phi\left[1-\exp(-b_\phi\beta N_r)\right]\right\}\right]^{-1}\\
+    &\quad
+    +C_{\Theta2}N_r\left(\frac{\beta}{1-\lambda\beta}\right)^2(1+\gamma)^2
+    +C_{\Theta3}\left(\frac{\gamma}{\gamma_0}+\frac{\gamma_0}{\gamma}-2\right),
+\end{aligned}
+\label{eq:Thetastar-final}
+\end{equation}
+其中 $C_{\Theta0},\ldots,C_{\Theta3}>0$。第二项表局部换热不足导致的热点，第三项表针肋阻塞与尾迹低速区引起的温度离散，第四项表歧管--微通道流阻匹配偏离造成的供液不均。
+
+\subsection{三输入三输出关系式与影响规律}
+
+综合式~\eqref{eq:Rstar-final}、\eqref{eq:Pstar-final}、\eqref{eq:Thetastar-final}，记综合换热能力 $\mathcal H$、阻塞因子 $\mathcal B$、匹配偏差 $\mathcal M$，得问题一的三输入三输出机理关系
+\begin{equation}
+    \begin{bmatrix}R^*\\[3pt]\Delta P^*\\[3pt]\Theta^*\end{bmatrix}
+    =
+    \begin{bmatrix}
+    C_{R0}+C_{R1}\mathcal H^{-1}+C_{R2}\mathcal B+C_{R3}\mathcal M\\[6pt]
+    C_{P0}+C_{P1}\left(\frac{1+\gamma}{\gamma}\right)^2+C_{P2}\dfrac{(1+\gamma)^3}{1-\lambda\beta I_N}+C_{P3}\mathcal B\\[10pt]
+    C_{\Theta0}+C_{\Theta1}\mathcal H^{-1}+C_{\Theta2}\mathcal B+C_{\Theta3}\mathcal M
+    \end{bmatrix},
+\label{eq:main-mapping}
+\end{equation}
+其中 $\mathcal H,\mathcal B,\mathcal M$ 由前述定义给出，均为 $\beta,\gamma,N_r$ 的函数；中间量 $u_{\mathrm{mc}},u_{\mathrm{mf}},D_{h,\mathrm{mc}},A_e$ 等均由三参数与外生条件决定，不构成新自变量。各项符号与主导次数汇总于表~\ref{tab:influence-q1}。
+
+\begin{table}[htbp]
+\centering
+\caption{结构参数对性能指标的影响规律}\label{tab:influence-q1}
+\begin{tabular}{@{}p{1.5cm} p{3.5cm} p{3.3cm} p{4.0cm}@{}}
+\specialrule{2pt}{0pt}{0pt}
+指标 & 针肋宽度比 $\beta$ & 针肋排数 $N_r$ & 歧管深高比 $\gamma$\\
+\midrule
+$R^*$ & $\mathcal H^{-1}$ 降与 $\mathcal B$ 升竞争，可现内部最优 & 同 $\beta$，强化趋于饱和 & $\mathcal H,\mathcal B,\mathcal M$ 竞争，符号由 $m,\gamma_0$ 标定\\
+$\Delta P^*$ & $(1-\lambda\beta)^{-2}$ 型强凸上升 & 近一次累积上升 & 歧管项降、通道项升，存在权衡\\
+$\Theta^*$ & $\mathcal H^{-1}$ 降与 $\mathcal B$ 升竞争，存在内部最优 & 同 $\beta$ & $\mathcal M$ 主导，$\gamma\to\gamma_0$ 最均匀\\
+\specialrule{2pt}{0pt}{0pt}
+\end{tabular}
+\end{table}
+
+由式~\eqref{eq:Rstar-final} 知，$\beta$ 与 $N_r$ 对热阻具有双重作用：增大时面积增益与扰流强化使 $\mathcal H$ 增大、降低 $R^*$，但阻塞项 $\mathcal B$ 随之快速增大，故二者对热阻体现为换热增强与流动阻塞的竞争，可出现内部最优。由式~\eqref{eq:Pstar-final} 知，压降对针肋更敏感：$N_r$ 以近一次累积进入局部损失，$\beta$ 通过 $(1-\lambda\beta)^{-1}$ 与 $(1-\lambda\beta)^{-2}$ 放大摩擦与局部损失；$\gamma$ 增大降低歧管段而抬高微通道段，存在权衡。由式~\eqref{eq:Thetastar-final} 知，温度非均匀性由串联升温、局部换热不足、针肋阻塞与匹配偏差共同决定，适度增大 $\beta,N_r$ 抑制热点、过大则因阻塞回升，$\gamma\to\gamma_0$ 时供液与换热最匹配、温度最均匀。
+
+综上，针肋宽度比与针肋排数主要体现"换热强化--流动阻力"权衡，歧管深高比主要体现"流量分配改善--微通道空间压缩"权衡；三指标互相冲突、不能同时最优，构成多目标优化的物理依据。其中 $R^*,\Theta^*$ 对 $\beta,N_r$ 的内部最优及 $\gamma$ 的最优位置，由问题二的数据代理模型在样本上定量标定。
+
+\subsection{三项性能指标作为综合评价依据的合理性}
+
+热阻 $R^*$ 反映芯片最高温度相对入口冷却液温度的升高，直接对应散热能力：相同发热功率下，热阻越小，结温越低。压降 $\Delta P^*$ 反映冷却液流经歧管层、微通道层与针肋阵列的总流动阻力：入口流量给定时，压降越大，循环泵功越高、能耗与工程实现难度越大。温度非均匀性 $\Theta^*$ 反映芯片区域热点与温度离散：即使平均温度较低，局部热点仍可能导致热应力集中、材料热疲劳与界面失效，故对应可靠性与寿命。
+
+综上，热阻、压降与温度非均匀性分别对应散热能力、流动能耗与可靠性，三个维度相互独立又彼此制约（由主线矛盾不可同时最优），且均可无量纲度量、便于跨尺度比较，共同构成该芯片歧管式微通道热管理系统结构设计的综合评价依据。
+
+
+
+\newpage
+
+% ===== 参考文献页。正式写作时按正文引用顺序替换为真实参考文献。 =====
+\noindent {\SectionTitleFont 参考文献 （可另起一页）}
+
+\BodyFont
+\noindent 参考文献的编号，如[1][3]等；引用书籍还必须指出页码。参考文献按正文中的引用次序列出，
+
+\noindent 其中：{\songti\bfseries 书籍的表述方式为}
+
+\noindent [编号] 作者，书名，出版地：出版社，出版年。
+
+\noindent {\songti\bfseries 参考文献中期刊杂志论文的表述方式为}
+
+\noindent [编号] 作者，论文名，杂志名，卷期号：起止页码，出版年。
+
+\noindent {\songti\bfseries 参考文献中网上资源的表述方式为}
+
+\noindent [编号] 作者，资源标题，网址，访问时间（年月日）。
+
+\newpage
+
+\noindent {\SectionTitleFont 附录（另起一页）}
+
+\end{document}
