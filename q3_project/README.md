@@ -3,7 +3,7 @@
 ## 一键运行
 **Windows**：双击 `run.bat`（或 cmd 里 `run.bat`）。
 **macOS / Linux**：`bash run.sh`
-指定数据：`run.bat "C:\path\附件2.xlsx"` / `bash run.sh /path/附件2.xlsx`
+指定问题二模型：`run.bat "C:\path\final_gp_surrogates.pkl"` / `bash run.sh /path/final_gp_surrogates.pkl`
 （首次运行自动 pip 安装依赖，需先装好 Python 3 并勾 "Add to PATH"）
 
 ## 目录
@@ -12,7 +12,7 @@ q3_project/
 ├── run.bat / run.sh        一键脚本
 ├── data_attachment2.xlsx   附件2数据
 ├── code/
-│   ├── q3_run.py           训练GP → 网格穷举 → Pareto → 膝点（含详细注释说明"为什么"）
+│   ├── q3_run.py           读取问题二GP → 网格穷举 → Pareto → 膝点（含详细注释说明"为什么"）
 │   └── q3_plots.py         按N_r上色的投影图 + R*-ΔP*权衡头牌图
 ├── outputs/                运行后生成：q3_result.json / pareto_front.csv / pareto_arrays.npz
 └── figures/                运行后生成：fig1_pareto_byNr.svg / fig2_tradeoff_R_dP.svg
@@ -26,8 +26,8 @@ q3_project/
 **2. 为什么 N_r 只取整数偶数档（0,2,4,6,8,10）？**
 针肋排数是物理整数量，连续化得到的"3.7 排"不可制造。取附件 2 真实档位，结论可落地。
 
-**3. 为什么第三问自训 GP 而不读问题二的 .pkl？**
-pickle 的 sklearn 模型跨版本/跨机器易报错。自训练让脚本完全自包含，且用与问题二相同的核（Matern 2.5 + 白噪声）与数据，结果一致。
+**3. 为什么第三问直接读取问题二的 .pkl？**
+问题三的任务是基于问题二已经筛选并在全样本上重拟合的最终 GP 代理模型做多目标优化，而不是重新训练代理模型。直接读取 `q2_project/outputs/final_gp_surrogates.pkl` 可以保证第三问严格承接第二问结果，避免重复训练带来的超参数微小差异。
 
 **4. 为什么膝点用"到极值解平面的最大距离"？**
 2 目标时"理想-最差连线"与之一致；3 目标下严谨的几何膝点是：Pareto 前沿上离"三个极值解（各最小化一个指标）所张平面"最远、且偏理想侧的解。它即"再多降一个指标就要付出不成比例代价"的转折点。

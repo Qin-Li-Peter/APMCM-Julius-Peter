@@ -13,9 +13,11 @@
    针肋排数是物理上的整数量，连续化插值得到的"3.7 排"不可制造。取附件 2
    的真实档位，结论可直接落地。
 
-3. 为什么第三问自己重训 GP，而不读问题二存的 .pkl？
-   pickle 的 sklearn 模型跨版本/跨机器易报错。自训练让本脚本完全自包含，
-   且与问题二用同一核(Matern2.5 + 白噪声)、同一数据，结果一致。
+3. 为什么第三问直接读取问题二保存的 GP？
+   问题三的任务是基于问题二已经筛选并在全样本上重拟合的最终代理模型做
+   多目标优化，而不是重新选择或重新训练代理模型。直接读取
+   q2_project/outputs/final_gp_surrogates.pkl 可以保证第三问严格承接第二问结果，
+   避免重复训练带来的超参数微小差异。
 
 4. 为什么膝点用"到极值解平面的最大距离"，而不是"理想-最差连线"？
    2 目标时两者一致；3 目标时，严谨的几何膝点是 Pareto 前沿上离"三个极值解
@@ -30,18 +32,18 @@
    它不需要人为指定权重 —— 给的是"几何上最均衡的客观折中点"。这正好与第四问
    "权重变化的影响"形成对照：第三问给不依赖权重的基准，第四问再扫权重看漂移。
 
-用法: python q3_run.py [数据xlsx路径]
+用法: python q3_run.py [问题二final_gp_surrogates.pkl路径]
 """
-import sys, os, json, warnings
-import numpy as np, pandas as pd
+import sys, os, json, pickle, warnings
+import numpy as np
+import pandas as pd
 warnings.filterwarnings("ignore")
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
-from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.gaussian_process.kernels import Matern, WhiteKernel, ConstantKernel as C
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DATA = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "..", "data_attachment2.xlsx")
+DEFAULT_MODEL = os.path.abspath(
+    os.path.join(HERE, "..", "..", "q2_project", "outputs", "final_gp_surrogates.pkl")
+)
+MODEL_PATH = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_MODEL
 OUT  = os.path.join(HERE, "..", "outputs")
 os.makedirs(OUT, exist_ok=True)
 
@@ -54,29 +56,21 @@ N_GRID      = 121                   # β、γ 各 121 档 → 121×121×6 ≈ 8.
 TARGETS = ["R*", "dP*", "Theta*"]   # 三个都"越小越好"
 
 
-def load_data(path):
-    df = pd.read_excel(path, sheet_name="Sheet1", header=1)
-    df.columns = ["id", "beta", "gamma", "Nr", "R", "dP", "Theta"]
-    df = df.dropna(subset=["beta"]).reset_index(drop=True)
-    for c in df.columns:
-        df[c] = pd.to_numeric(df[c])
-    return df
-
-
-def train_surrogates(df):
-    """与问题二同核的高斯过程：Matern(nu=2.5)*常数 + 白噪声，标准化输入。"""
-    X = df[["beta", "gamma", "Nr"]].values
-    ys = {"R*": df["R"].values, "dP*": df["dP"].values, "Theta*": df["Theta"].values}
-    models = {}
-    for t, y in ys.items():
-        kernel = (C(1.0, (1e-3, 1e3)) * Matern([1, 1, 1], (1e-2, 1e2), nu=2.5)
-                  + WhiteKernel(1e-3, (1e-8, 1e-1)))
-        gp = Pipeline([("sc", StandardScaler()),
-                       ("gp", GaussianProcessRegressor(kernel=kernel, normalize_y=True,
-                                                       n_restarts_optimizer=6, alpha=1e-10))])
-        models[t] = gp.fit(X, y)
-        print(f"  [GP] {t:<7} 训练R2 = "
-              f"{1 - np.sum((y - gp.predict(X))**2)/np.sum((y - y.mean())**2):.4f}", flush=True)
+def load_surrogates(path):
+    """读取问题二保存的最终 GP 代理模型，第三问不重新训练。"""
+    if not os.path.exists(path):
+        raise FileNotFoundError(
+            "未找到问题二最终GP代理模型：\n"
+            f"  {path}\n"
+            "请先运行 q2_project/code/q2_run.py 生成 "
+            "q2_project/outputs/final_gp_surrogates.pkl，"
+            "或把该 pkl 路径作为 q3_run.py 的第一个参数。"
+        )
+    with open(path, "rb") as f:
+        models = pickle.load(f)
+    missing = [t for t in TARGETS if t not in models]
+    if missing:
+        raise KeyError(f"问题二GP文件缺少目标模型: {missing}")
     return models
 
 
@@ -134,8 +128,9 @@ def run():
     print("=" * 64)
     print("问题三 · 网格穷举 Pareto 前沿 + 膝点法")
     print("=" * 64)
-    df = load_data(DATA); print(f"样本数 n = {len(df)}；开始训练 GP 代理 ...", flush=True)
-    models = train_surrogates(df)
+    print("读取问题二最终 GP 代理模型 ...", flush=True)
+    print(f"  {MODEL_PATH}", flush=True)
+    models = load_surrogates(MODEL_PATH)
 
     print("\n构建网格并用 GP 预测三指标 ...", flush=True)
     grid = build_grid()

@@ -3,7 +3,7 @@ chcp 65001 >nul
 REM =====================================================================
 REM  问题三 . 一键运行 (Windows)
 REM    网格穷举求 Pareto 前沿 + 膝点法选综合最优
-REM  用法: 双击 run.bat  或  run.bat "C:\路径\附件2.xlsx"
+REM  用法: 双击 run.bat  或  run.bat "C:\路径\final_gp_surrogates.pkl"
 REM =====================================================================
 setlocal
 cd /d "%~dp0"
@@ -18,8 +18,8 @@ if not defined PY (
 )
 echo 使用解释器: %PY%
 
-set "DATA=%~1"
-if "%DATA%"=="" set "DATA=data_attachment2.xlsx"
+set "MODEL=%~1"
+if "%MODEL%"=="" set "MODEL=..\q2_project\outputs\final_gp_surrogates.pkl"
 
 echo.
 echo ^>^>^> [1/3] 检查/安装依赖 ...
@@ -32,7 +32,7 @@ if errorlevel 1 (
 
 echo.
 echo ^>^>^> [2/3] 网格穷举 + 膝点优化 ...
-%PY% code\q3_run.py "%DATA%"
+%PY% code\q3_run.py "%MODEL%"
 if errorlevel 1 ( echo [错误] 优化运行失败 & pause & exit /b 1 )
 
 echo.
