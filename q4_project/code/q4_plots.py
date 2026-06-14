@@ -38,8 +38,8 @@ cols = np.array([cmap_d[b] for b in best_idx])
 ax.scatter(x, y, c=cols, s=18)
 # 标出鲁棒解所占区域的中心 & 三个顶点标签
 rx, ry = to_tri(W[best_idx == robust_i])
-ax.scatter(rx.mean(), ry.mean(), s=260, marker="*", c="k",
-           edgecolor="w", lw=.8, zorder=5,
+ax.scatter(rx.mean(), ry.mean(), s=260, marker="*", c="red",
+           edgecolors="none", zorder=5,
            label=f"Robust (β={Xp[robust_i,0]:.2f},γ={Xp[robust_i,1]:.1f},Nr={int(Xp[robust_i,2])})")
 for (vx, vy), t in zip([(0, 0), (1, 0), (0.5, np.sqrt(3)/2)],
                        ["w(R*)=1", "w(dP*)=1", "w(σ*)=1"]):
@@ -47,7 +47,6 @@ for (vx, vy), t in zip([(0, 0), (1, 0), (0.5, np.sqrt(3)/2)],
                 va="top" if vy == 0 else "bottom", fontsize=10,
                 xytext=(0, -8 if vy == 0 else 8), textcoords="offset points")
 ax.plot([0, 1, 0.5, 0], [0, 0, np.sqrt(3)/2, 0], "k-", lw=.6)
-ax.set_title("Optimal design over the weight simplex\n(each color = one selected design)")
 ax.legend(loc="upper right", fontsize=8); ax.axis("off"); ax.set_aspect("equal")
 fig.tight_layout(); fig.savefig(os.path.join(FIG, "fig1_weight_simplex.svg"),
                                 bbox_inches="tight"); plt.close(fig)
@@ -59,14 +58,17 @@ labels = ["w(R*) dominant", "w(dP*) dominant", "w(σ*) dominant"]
 P = Xp[best_idx]   # 每组权重选出的参数
 fig, axes = plt.subplots(1, 3, figsize=(11.5, 3.6))
 names = [r"$\beta$", r"$\gamma$", r"$N_r$"]
+robust_x = Xp[robust_i]
+robust_dom = sorted(set(dom[best_idx == robust_i].tolist()))
 for k, ax in enumerate(axes):
     for dv, c in zip([0, 1, 2], ["#185FA5", "#A32D2D", "#0F6E56"]):
         vals = P[dom == dv, k]
         ax.scatter(np.full(vals.shape, dv) + np.random.uniform(-.15, .15, vals.shape),
                    vals, s=10, c=c, alpha=.4)
+    ax.scatter(robust_dom, [robust_x[k]] * len(robust_dom),
+               s=150, marker="*", c="red", edgecolors="none", zorder=5)
     ax.set_xticks([0, 1, 2]); ax.set_xticklabels(["R", "dP", "σ"], fontsize=9)
     ax.set_xlabel("dominant weight"); ax.set_ylabel(names[k]); ax.grid(alpha=.25)
-fig.suptitle("Selected design parameters vs. dominant preference weight", y=1.0)
 fig.tight_layout(); fig.savefig(os.path.join(FIG, "fig2_param_drift.svg"),
                                 bbox_inches="tight"); plt.close(fig)
 print("[saved to figures/] fig1_weight_simplex.svg | fig2_param_drift.svg")

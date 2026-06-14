@@ -5548,7 +5548,7 @@ L 810.340625 40.2
 " style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
    </g>
   </g>
-  <g id="text_38">
+  <g id="text_38" style="display: none">
    <!-- Selected design parameters vs. dominant preference weight -->
    <g transform="translate(225.088437 16.318125) scale(0.12 -0.12)">
     <defs>
@@ -5776,6 +5776,14 @@ z
     <use xlink:href="#DejaVuSans-74" transform="translate(2994.962891 0)"/>
    </g>
   </g>
+ </g>
+ <g id="robust_stars">
+   <path d="M 73.304 52.956 L 75.303 58.206 L 80.913 58.484 L 76.538 62.007 L 78.007 67.429 L 73.304 64.356 L 68.602 67.429 L 70.071 62.007 L 65.696 58.484 L 71.306 58.206 z" style="fill: #ff0000; stroke: none"/>
+   <path d="M 248.208 52.956 L 250.206 58.206 L 255.816 58.484 L 251.441 62.007 L 252.910 67.429 L 248.208 64.356 L 243.505 67.429 L 244.974 62.007 L 240.599 58.484 L 246.209 58.206 z" style="fill: #ff0000; stroke: none"/>
+   <path d="M 342.865 40.591 L 344.863 45.840 L 350.473 46.119 L 346.098 49.642 L 347.567 55.063 L 342.865 51.991 L 338.163 55.063 L 339.631 49.642 L 335.256 46.119 L 340.866 45.840 z" style="fill: #ff0000; stroke: none"/>
+   <path d="M 517.664 40.591 L 519.662 45.840 L 525.272 46.119 L 520.897 49.642 L 522.366 55.063 L 517.664 51.991 L 512.961 55.063 L 514.430 49.642 L 510.055 46.119 L 515.665 45.840 z" style="fill: #ff0000; stroke: none"/>
+   <path d="M 612.407 166.455 L 614.405 171.704 L 620.015 171.982 L 615.640 175.505 L 617.109 180.927 L 612.407 177.855 L 607.704 180.927 L 609.173 175.505 L 604.798 171.982 L 610.408 171.704 z" style="fill: #ff0000; stroke: none"/>
+   <path d="M 787.187 166.455 L 789.185 171.704 L 794.795 171.982 L 790.421 175.505 L 791.889 180.927 L 787.187 177.855 L 782.485 180.927 L 783.953 175.505 L 779.579 171.982 L 785.189 171.704 z" style="fill: #ff0000; stroke: none"/>
  </g>
  <defs>
   <clipPath id="p57bcc7b173">

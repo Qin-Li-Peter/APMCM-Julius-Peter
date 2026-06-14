@@ -2,10 +2,10 @@
 """
 问题三 · 绘图（清晰版，读取 q3_run.py 的输出）
 ==================================================
-为什么这么画：N_r 是离散档(2/4/6/8/10)，三维散点会碎成"悬空面条"难以解读。
-故改为：
+为什么这么画：N_r 是离散档(2/4/6/8/10)，直接看三维散点容易出现分层。
+故采用：
   fig1  三张两两投影，按 N_r 上色(每个排数档一条权衡曲线) + 膝点/理想点
-  fig2  头牌图：R*–ΔP* 主权衡，颜色=第三指标 Θ*(色条) + 膝点/理想点
+  fig2  三维 Pareto 前沿，坐标轴=三目标，按 N_r 上色 + 红星/红三角标出两个关键点
 用法: python q3_plots.py
 """
 import os, warnings
@@ -13,6 +13,7 @@ import numpy as np
 warnings.filterwarnings("ignore")
 import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401  register 3D projection
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT  = os.path.join(HERE, "..", "outputs")
@@ -24,14 +25,14 @@ d = np.load(os.path.join(OUT, "pareto_arrays.npz"))
 Xp, Fp, ki, ip = d["Xp"], d["Fp"], int(d["knee_idx"]), int(d["ideal_idx"])
 Nr = Xp[:, 2]
 LAB = ["R*", "dP*", "Theta*"]
-RED, AMBER = "#A32D2D", "#BA7517"
+RED = "#C92A2A"
 NR_COLORS = {2: "#85B7EB", 4: "#1D9E75", 6: "#BA7517", 8: "#D4537E", 10: "#534AB7"}
 
 def mark_knee(ax, i, j):
     ax.scatter(Fp[ki, i], Fp[ki, j], s=240, c=RED, marker="*",
                edgecolor="k", lw=.7, zorder=6, label="Knee (chosen)")
-    ax.scatter(Fp[ip, i], Fp[ip, j], s=80, c=AMBER, marker="D",
-               edgecolor="k", lw=.5, zorder=6, label="Ideal-point")
+    ax.scatter(Fp[ip, i], Fp[ip, j], s=100, c=RED, marker="^",
+               edgecolor="k", lw=.6, zorder=6, label="Ideal-point ref.")
 
 # ---- Fig 1: 三投影，按 N_r 上色 ----
 pairs = [(0, 1), (0, 2), (1, 2)]
@@ -51,16 +52,31 @@ fig.suptitle("Pareto front projections — colored by pin-fin rows N_r", y=0.99)
 fig.tight_layout(rect=[0, 0, 1, 0.96])
 fig.savefig(os.path.join(FIG, "fig1_pareto_byNr.svg"), bbox_inches="tight"); plt.close(fig)
 
-# ---- Fig 2: 头牌 R*–dP* 权衡, 颜色=Theta* ----
-fig, ax = plt.subplots(figsize=(7.2, 5))
-sc = ax.scatter(Fp[:, 0], Fp[:, 1], c=Fp[:, 2], s=26, cmap="viridis_r",
-                alpha=.85, edgecolor="none")
-cb = fig.colorbar(sc, ax=ax); cb.set_label("Theta*  (temperature non-uniformity)")
-mark_knee(ax, 0, 1)
-ax.set_xlabel("R*  (thermal resistance)")
-ax.set_ylabel("dP*  (pressure drop)")
-ax.set_title("Pareto front: R* vs dP* trade-off (color = Theta*)")
-ax.legend(loc="upper right", fontsize=9); ax.grid(alpha=.25)
-fig.tight_layout(); fig.savefig(os.path.join(FIG, "fig2_tradeoff_R_dP.svg")); plt.close(fig)
+# ---- Fig 2: 三维 Pareto 前沿, 按 N_r 上色 ----
+fig = plt.figure(figsize=(8.6, 6.0))
+ax = fig.add_subplot(111, projection="3d")
+for nv in sorted(NR_COLORS):
+    m = Nr == nv
+    if m.any():
+        ax.scatter(Fp[m, 0], Fp[m, 1], Fp[m, 2],
+                   s=18, c=NR_COLORS[nv], alpha=.58,
+                   depthshade=False, edgecolor="none", label=f"N_r={int(nv)}")
+
+ax.scatter(Fp[ki, 0], Fp[ki, 1], Fp[ki, 2],
+           s=360, c=RED, marker="*", edgecolor="k", lw=.8,
+           depthshade=False, label="Knee (chosen)", zorder=10)
+ax.scatter(Fp[ip, 0], Fp[ip, 1], Fp[ip, 2],
+           s=170, c=RED, marker="^", edgecolor="k", lw=.8,
+           depthshade=False, label="Ideal-point ref.", zorder=10)
+
+ax.set_xlabel("R*  (thermal resistance)", labelpad=8)
+ax.set_ylabel("dP*  (pressure drop)", labelpad=8)
+ax.set_zlabel("Theta*  (temperature non-uniformity)", labelpad=8)
+ax.view_init(elev=28, azim=45)
+ax.grid(alpha=.25)
+ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1.0), fontsize=8, frameon=False)
+fig.tight_layout()
+fig.savefig(os.path.join(FIG, "fig2_tradeoff_R_dP.svg"), bbox_inches="tight")
+plt.close(fig)
 
 print("[saved to figures/] fig1_pareto_byNr.svg | fig2_tradeoff_R_dP.svg")

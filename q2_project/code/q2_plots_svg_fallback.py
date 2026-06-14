@@ -6,6 +6,7 @@ Reads q2_run.py outputs and writes the same three SVG figure files expected by
 the README. This is useful on machines where matplotlib is not installed.
 """
 import json
+import math
 import os
 
 import numpy as np
@@ -26,10 +27,10 @@ MLAB = {
     "RandomForest": "Random Forest",
 }
 COL = {
-    "PhysElasticNet": "#534AB7",
-    "GP_Kriging": "#0F6E56",
-    "QuadRSM": "#BA7517",
-    "RandomForest": "#888780",
+    "PhysElasticNet": "#1F77B4",
+    "GP_Kriging": "#D62728",
+    "QuadRSM": "#2CA02C",
+    "RandomForest": "#9467BD",
 }
 
 
@@ -72,6 +73,15 @@ def polyline(points, stroke, width=2):
     return f'<polyline points="{pts}" fill="none" stroke="{stroke}" stroke-width="{width}"/>'
 
 
+def polygon(points, fill, stroke, width=1.6, opacity=0.1, dash=""):
+    pts = " ".join(f"{x:.1f},{y:.1f}" for x, y in points)
+    dash_attr = f' stroke-dasharray="{dash}"' if dash else ""
+    return (
+        f'<polygon points="{pts}" fill="{fill}" fill-opacity="{opacity}" '
+        f'stroke="{stroke}" stroke-width="{width}"{dash_attr}/>'
+    )
+
+
 def svg(width, height, body):
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
@@ -100,31 +110,52 @@ def map_x(v, lo, hi, left, right):
 
 
 def plot_model_comparison(res):
-    width, height = 760, 430
-    left, right, top, bottom = 70, 730, 55, 330
+    width, height = 640, 620
+    cx, cy, rmax = 320, 285, 210
+    rmin, rmax_value = 0.4, 1.0
+    angles = [-math.pi / 2 + 2 * math.pi * i / len(TARGETS) for i in range(len(TARGETS))]
     body = []
-    body.append(text(width / 2, 28, "Four-model comparison (leave-one-out)", 16, weight="bold"))
 
-    for q in [0.4, 0.6, 0.8, 1.0]:
-        y = map_y(q, 0.4, 1.02, top, bottom)
-        body.append(line(left, y, right, y, "#e3e3e3"))
-        body.append(text(left - 12, y + 4, f"{q:.1f}", 10, anchor="end", fill="#5f6368"))
-    body.append(line(left, top, left, bottom, "#5f6368"))
-    body.append(line(left, bottom, right, bottom, "#5f6368"))
-    body.append(text(22, (top + bottom) / 2, "LOO Q2", 12, anchor="middle"))
+    def radius(value):
+        value = max(rmin, min(rmax_value, float(value)))
+        return (value - rmin) / (rmax_value - rmin) * rmax
 
-    group_w = (right - left) / len(TARGETS)
-    bar_w = 28
-    for ti, target in enumerate(TARGETS):
-        cx = left + group_w * (ti + 0.5)
-        body.append(text(cx, bottom + 28, target, 12))
-        for mi, model in enumerate(MODELS):
-            q2 = res[target][model]["Q2_LOO"]
-            x = cx + (mi - 1.5) * (bar_w + 4) - bar_w / 2
-            y = map_y(q2, 0.4, 1.02, top, bottom)
-            body.append(rect(x, y, bar_w, bottom - y, COL[model]))
+    def point(angle, radius_value):
+        return cx + radius_value * math.cos(angle), cy + radius_value * math.sin(angle)
 
-    lx, ly = 170, 365
+    for q in [0.5, 0.7, 0.9, 1.0]:
+        ring = [point(angle, radius(q)) for angle in angles]
+        body.append(polygon(ring, "none", "#CBD5E1", width=0.9, opacity=0, dash="3,3" if q < 1.0 else ""))
+        label_x, label_y = point(angles[0] + math.radians(18), radius(q))
+        body.append(text(label_x + 4, label_y + 4, f"{q:.1f}", 10, anchor="start", fill="#4B5563"))
+
+    for angle, target in zip(angles, TARGETS):
+        x, y = point(angle, rmax)
+        body.append(line(cx, cy, x, y, "#CBD5E1", width=0.9))
+        lx, ly = point(angle, rmax + 34)
+        body.append(text(lx, ly + 4, target, 14, fill="#202124", weight="bold"))
+
+    dash_map = {"PhysElasticNet": "7,5", "GP_Kriging": "", "QuadRSM": "5,2", "RandomForest": "2,2"}
+    width_map = {"PhysElasticNet": 1.6, "GP_Kriging": 2.8, "QuadRSM": 1.6, "RandomForest": 1.6}
+    marker_map = {"PhysElasticNet": "circle", "GP_Kriging": "square", "QuadRSM": "triangle", "RandomForest": "diamond"}
+
+    for model in MODELS:
+        pts = [point(angle, radius(res[target][model]["Q2_LOO"])) for angle, target in zip(angles, TARGETS)]
+        body.append(polygon(pts, "none", COL[model], width=width_map[model],
+                            opacity=0, dash=dash_map[model]))
+        for x, y in pts:
+            if marker_map[model] == "square":
+                body.append(rect(x - 4, y - 4, 8, 8, COL[model], stroke="white"))
+            elif marker_map[model] == "triangle":
+                tri = [(x, y - 5), (x - 4.8, y + 3.8), (x + 4.8, y + 3.8)]
+                body.append(polygon(tri, COL[model], "white", width=0.6, opacity=1))
+            elif marker_map[model] == "diamond":
+                dia = [(x, y - 5), (x - 5, y), (x, y + 5), (x + 5, y)]
+                body.append(polygon(dia, COL[model], "white", width=0.6, opacity=1))
+            else:
+                body.append(circle(x, y, 4.4, COL[model], opacity=1))
+
+    lx, ly = 92, 535
     for i, model in enumerate(MODELS):
         x = lx + (i % 2) * 250
         y = ly + (i // 2) * 24

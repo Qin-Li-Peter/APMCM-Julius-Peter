@@ -4260,7 +4260,7 @@ z
      <use xlink:href="#DejaVuSans-31" transform="translate(356.982422 0)"/>
     </g>
    </g>
-   <g id="text_4">
+   <g id="text_4" style="display: none">
     <!-- Optimal design over the weight simplex -->
     <g transform="translate(109.458466 16.318125) scale(0.12 -0.12)">
      <defs>
@@ -4721,10 +4721,10 @@ L 2.928786 0.95162
 L 7.667663 -2.491375 
 L 1.81009 -2.491375 
 z
-" style="stroke: #ffffff; stroke-width: 0.8"/>
+" style="fill: #ff0000; stroke: none"/>
     </defs>
     <g clip-path="url(#p7d38225514)">
-     <use xlink:href="#mac95a815ff" x="221.048033" y="195.587039" style="stroke: #ffffff; stroke-width: 0.8"/>
+     <use xlink:href="#mac95a815ff" x="221.048033" y="195.587039" style="fill: #ff0000; stroke: none"/>
     </g>
    </g>
    <g id="legend_1">
@@ -4743,7 +4743,7 @@ z
     </g>
     <g id="PathCollection_3">
      <g>
-      <use xlink:href="#mac95a815ff" x="312.368778" y="46.98425" style="stroke: #ffffff; stroke-width: 0.8"/>
+      <use xlink:href="#mac95a815ff" x="312.368778" y="46.98425" style="fill: #ff0000; stroke: none"/>
      </g>
     </g>
     <g id="text_5">
